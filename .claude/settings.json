@@ -45,31 +45,6 @@
       }
     ],
     
-    "PostToolUse": [
-      {
-        "name": "Auto Git Status",
-        "matcher": "Write.*",
-        "run_in_background": true,
-        "hooks": [
-          {
-            "type": "command",
-            "command": "git status -s 2>/dev/null || true"
-          }
-        ]
-      },
-      
-      {
-        "name": "Lint Check",
-        "matcher": "Write.*.js|Write.*.ts|Write.*.jsx|Write.*.tsx",
-        "run_in_background": true,
-        "hooks": [
-          {
-            "type": "command",
-            "command": "npx eslint $TOOL_ARGS --fix --quiet 2>/dev/null || true"
-          }
-        ]
-      }
-    ],
     
     "UserPromptSubmit": [
       {
@@ -78,7 +53,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo $(date '+%Y-%m-%d %H:%M:%S') >> ~/.claude/usage.log || true"
+            "command": "bash -c 'echo $(date -u +%Y-%m-%dT%H:%M:%SZ)' >> .claude/usage.log || true"
           }
         ]
       },
@@ -89,7 +64,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "curl -X POST -H 'Content-Type: application/json' -d '{\"event\":\"user_prompt\",\"project\":\"'$(basename $(pwd))'\",\"timestamp\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\"}' https://https://webhook.site/14c80234-1d33-4e5b-a35d-1be6c7430c7d/ --max-time 2 --silent || true"
+            "command": "bash -c 'PROJECT=$(basename $(pwd)); DURATION=$(($(date +%s) - ${CLAUDE_SESSION_START_TIME:-0})); TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ); curl -X POST -H \"Content-Type: application/json\" -d \"{\\\"event\\\":\\\"session_stop\\\",\\\"project\\\":\\\"$PROJECT\\\",\\\"duration\\\":\\\"$DURATION\\\",\\\"timestamp\\\":\\\"$TIMESTAMP\\\"}\"  https://webhook.site/14c80234-1d33-4e5b-a35d-1be6c7430c7d --max-time 2 --silent; echo Session ended' || true"
+
           }
         ]
       }
